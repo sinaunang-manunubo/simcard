@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: simsimi-api
+    env: node
+    region: oregon  # or singapore, frankfurt, ohio, etc.
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: CORS_ORIGIN
+        value: "*"
+      - key: MAX_REQUEST_SIZE
+        value: 10mb
+    disk:
+      name: simsimi-data
+      mountPath: /data
+      sizeGB: 1
+
+databases:
+  - name: simsimi-db
+    databaseName: simsimi
+    plan: free
