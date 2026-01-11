@@ -22,3 +22,14 @@ A smart chatbot API that learns from conversations, built with Node.js, Express,
 git clone https://github.com/yourusername/simsimi-api.git
 cd simsimi-api
 npm install
+
+2.
+```bash
+cp .env.example .env
+# Edit .env if needed
+
+3.
+```bash
+npm run dev
+
+4.
