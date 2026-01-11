@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤖 SimSimi Chatbot</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
+    <style>
+        :root {
+            --primary-color: #4f46e5;
+            --primary-dark: #3730a3;
+            --secondary-color: #10b981;
+            --danger-color: #ef4444;
+            --bg-color: #111827;
+            --bg-secondary: #1f2937;
+            --text-color: #f9fafb;
+            --text-secondary: #d1d5db;
+            --border-color: #374151;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            --radius: 12px;
+            --transition: all 0.3s ease;
+        }
+
+        [data-theme="light"] {
+            --primary-color: #4f46e5;
+            --primary-dark: #3730a3;
+            --secondary-color: #10b981;
+            --danger-color: #dc2626;
+            --bg-color: #f9fafb;
+            --bg-secondary: #ffffff;
+            --text-color: #111827;
+            --text-secondary: #6b7280;
+            --border-color: #e5e7eb;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            min-height: 100vh;
+            transition: var(--transition);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            min-height: 100vh;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                padding: 15px;
+            }
+        }
+
+        header {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+
+        .logo {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .theme-switch {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 50px;
+            padding: 8px;
+            cursor: pointer;
+            z-index: 1000;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .theme-switch:hover {
+            transform: scale(1.05);
+        }
+
+        .theme-switch svg {
+            width: 24px;
+            height: 24px;
+            fill: var(--text-color);
+        }
+
+        .panel {
+            background: var(--bg-secondary);
+            border-radius: var(--radius);
+            padding: 25px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
+        }
+
+        .panel:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+        }
+
+        .panel h2 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .panel h2 svg {
+            width: 24px;
+            height: 24px;
+            fill: var(--primary-color);
+        }
+
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 500px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: var(--radius);
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 16px;
+            border-radius: var(--radius);
+            max-width: 80%;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .user-message {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
+        }
+
+        .bot-message {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            margin-right: auto;
+            border-bottom-left-radius: 4px;
+        }
+
+        .message-header {
+            font-size: 0.85rem;
+            margin-bottom: 5px;
+            opacity: 0.8;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .message-content {
+            word-wrap: break-word;
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 12px 16px;
+            background: var(--bg-color);
+            border-radius: var(--radius);
+            margin-right: auto;
+            border: 1px solid var(--border-color);
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dots span {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--text-secondary);
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-5px); }
+        }
+
+        .chat-input {
+            display: flex;
+            gap: 10px;
+        }
+
+        input, textarea, button {
+            font-family: inherit;
+            font-size: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 12px 16px;
+            background: var(--bg-color);
+            color: var(--text-color);
+            transition: var(--transition);
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .chat-input input {
+            flex: 1;
+        }
+
+        button {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 15px rgba(79, 70, 229, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        }
+
+        .secondary-btn {
+            background: linear-gradient(135deg, var(--secondary-color), #059669);
+        }
+
+        .danger-btn {
+            background: linear-gradient(135deg, var(--danger-color), #b91c1c);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: var(--bg-color);
+            padding: 20px;
+            border-radius: var(--radius);
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .api-tester {
+            margin-top: 30px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .tab {
+            padding: 8px 16px;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-radius: var(--radius);
+            font-weight: 600;
+        }
+
+        .tab.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .code-block {
+            background: var(--bg-color);
+            border-radius: var(--radius);
+            padding: 15px;
+            margin: 15px 0;
+            border: 1px solid var(--border-color);
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        .response-preview {
+            background: var(--bg-color);
+            border-radius: var(--radius);
+            padding: 15px;
+            margin-top: 15px;
+            border: 1px solid var(--border-color);
+            max-height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--secondary-color);
+            color: white;
+            padding: 12px 20px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 1000;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast.error {
+            background: var(--danger-color);
+        }
+
+        footer {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 20px 0;
+            margin-top: 30px;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .instructions {
+            background: var(--bg-color);
+            padding: 15px;
+            border-radius: var(--radius);
+            margin: 15px 0;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .instructions h4 {
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+
+        .instructions ul {
+            padding-left: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 5px;
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .logo {
+                font-size: 2.5rem;
+            }
+            
+            .panel {
+                padding: 15px;
+            }
+            
+            .chat-container {
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="theme-switch" id="themeToggle" title="Toggle theme">
+        <svg viewBox="0 0 24 24">
+            <path d="M12,18C8.7,18 6,15.3 6,12C6,8.7 8.7,6 12,6C15.3,6 18,8.7 18,12C18,15.3 15.3,18 12,18M12,8C9.8,8 8,9.8 8,12C8,14.2 9.8,16 12,16C14.2,16 16,14.2 16,12C16,9.8 14.2,8 12,8M12,4C7.6,4 4,7.6 4,12C4,16.4 7.6,20 12,20C16.4,20 20,16.4 20,12C20,7.6 16.4,4 12,4Z" />
+        </svg>
+    </button>
+
+    <div class="container">
+        <header>
+            <div class="logo">🤖</div>
+            <h1>SimSimi Chatbot</h1>
+            <p class="subtitle">A smart chatbot that learns from your conversations. Ask questions and teach new responses!</p>
+        </header>
+
+        <!-- Chat Panel -->
+        <div class="panel">
+            <h2>
+                <svg viewBox="0 0 24 24">
+                    <path d="M20,2H4A2,2 0 0,0 2,4V22L6,18H20A2,2 0 0,0 22,16V4A2,2 0 0,0 20,2Z" />
+                </svg>
+                Chat with SimSimi
+            </h2>
+            
+            <div class="chat-container">
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message bot-message">
+                        <div class="message-header">
+                            <span>🤖 SimSimi</span>
+                            <span>Just now</span>
+                        </div>
+                        <div class="message-content">
+                            Hello! I'm SimSimi, your friendly chatbot. Ask me anything or teach me new responses!
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="typing-indicator" id="typingIndicator">
+                    <div class="typing-dots">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+                
+                <div class="chat-input">
+                    <input type="text" id="messageInput" placeholder="Type your message here..." autocomplete="off">
+                    <button id="sendButton" class="primary-btn">
+                        <svg viewBox="0 0 24 24" width="20" height="20">
+                            <path fill="currentColor" d="M2,21L23,12L2,3V10L17,12L2,14V21Z" />
+                        </svg>
+                        Send
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Teach Panel -->
+        <div class="panel">
+            <h2>
+                <svg viewBox="0 0 24 24">
+                    <path d="M12,3L1,9L12,15L21,10.09V17H23V9M5,13.18V17.18L12,21L19,17.18V13.18L12,17L5,13.18Z" />
+                </svg>
+                Teach SimSimi
+            </h2>
+            
+            <div class="form-group">
+                <label for="teachQuestion">Question:</label>
+                <input type="text" id="teachQuestion" placeholder="What users will ask...">
+            </div>
+            
+            <div class="form-group">
+                <label for="teachAnswer">Answer:</label>
+                <textarea id="teachAnswer" placeholder="How SimSimi should respond..."></textarea>
+            </div>
+            
+            <button id="teachButton" class="secondary-btn">
+                <svg viewBox="0 0 24 24" width="20" height="20">
+                    <path fill="currentColor" d="M10,17L5,12L6.41,10.58L10,14.17L17.59,6.58L19,8M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z" />
+                </svg>
+                Teach Response
+            </button>
+            
+            <div class="instructions">
+                <h4>How to teach:</h4>
+                <ul>
+                    <li>Enter a question users might ask</li>
+                    <li>Provide the response SimSimi should give</li>
+                    <li>Click "Teach Response" to save</li>
+                    <li>SimSimi will remember this forever!</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Stats Panel -->
+        <div class="panel">
+            <h2>
+                <svg viewBox="0 0 24 24">
+                    <path d="M22,21H2V3H4V19H6V10H10V19H12V6H16V19H18V14H22V21Z" />
+                </svg>
+                Statistics
+            </h2>
+            
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalResponses">0</div>
+                    <div class="stat-label">Total Responses</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalInteractions">0</div>
+                    <div class="stat-label">Total Interactions</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="taughtResponses">0</div>
+                    <div class="stat-label">Taught Responses</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="avgResponseTime">0ms</div>
+                    <div class="stat-label">Avg Response Time</div>
+                </div>
+            </div>
+            
+            <button id="refreshStats" class="primary-btn" style="margin-top: 20px;">
+                <svg viewBox="0 0 24 24" width="20" height="20">
+                    <path fill="currentColor" d="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z" />
+                </svg>
+                Refresh Stats
+            </button>
+        </div>
+
+        <!-- API Tester Panel -->
+        <div class="panel api-tester">
+            <h2>
+                <svg viewBox="0 0 24 24">
+                    <path d="M14.6,16.6L19.2,12L14.6,7.4L16,6L22,12L16,18L14.6,16.6M9.4,16.6L4.8,12L9.4,7.4L8,6L2,12L8,18L9.4,16.6Z" />
+                </svg>
+                API Tester
+            </h2>
+            
+            <div class="tabs">
+                <button class="tab active" data-tab="ask-tab">GET /ask</button>
+                <button class="tab" data-tab="teach-tab">POST /teach</button>
+                <button class="tab" data-tab="stats-tab">GET /stats</button>
+            </div>
+            
+            <div class="tab-content active" id="ask-tab">
+                <div class="form-group">
+                    <label for="apiQuestion">Question:</label>
+                    <input type="text" id="apiQuestion" placeholder="Enter a question" value="hello">
+                </div>
+                <button id="testAsk" class="primary-btn">Test /ask Endpoint</button>
+                
+                <div class="code-block">
+                    <strong>Request:</strong>
+                    <code>GET /api/v1/ask?q=<span id="askQuery">hello</span></code>
+                </div>
+                
+                <div class="response-preview" id="askResponse">
+                    Response will appear here...
+                </div>
+            </div>
+            
+            <div class="tab-content" id="teach-tab">
+                <div class="form-group">
+                    <label for="apiTeachQ">Question:</label>
+                    <input type="text" id="apiTeachQ" placeholder="Enter question" value="good afternoon">
+                </div>
+                <div class="form-group">
+                    <label for="apiTeachA">Answer:</label>
+                    <input type="text" id="apiTeachA" placeholder="Enter answer" value="Good afternoon! How's your day going?">
+                </div>
+                <button id="testTeach" class="secondary-btn">Test /teach Endpoint</button>
+                
+                <div class="code-block">
+                    <strong>Request:</strong>
+                    <code>POST /api/v1/teach
+{
+  "question": "good afternoon",
+  "answer": "Good afternoon! How's your day going?"
+}</code>
+                </div>
+                
+                <div class="response-preview" id="teachResponse">
+                    Response will appear here...
+                </div>
+            </div>
+            
+            <div class="tab-content" id="stats-tab">
+                <button id="testStats" class="primary-btn">Test /stats Endpoint</button>
+                
+                <div class="code-block">
+                    <strong>Request:</strong>
+                    <code>GET /api/v1/stats</code>
+                </div>
+                
+                <div class="response-preview" id="statsResponse">
+                    Response will appear here...
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>SimSimi Chatbot API v1.0 | Ready for Render.com Deployment</p>
+            <p>Made with ❤️ | Chatbot learns from every conversation</p>
+        </footer>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // API Configuration
+        const API_BASE_URL = window.location.origin + '/api/v1';
+        
+        // DOM Elements
+        const themeToggle = document.getElementById('themeToggle');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const chatMessages = document.getElementById('chatMessages');
+        const typingIndicator = document.getElementById('typingIndicator');
+        const teachQuestion = document.getElementById('teachQuestion');
+        const teachAnswer = document.getElementById('teachAnswer');
+        const teachButton = document.getElementById('teachButton');
+        const toast = document.getElementById('toast');
+        
+        // Stats elements
+        const totalResponsesEl = document.getElementById('totalResponses');
+        const totalInteractionsEl = document.getElementById('totalInteractions');
+        const taughtResponsesEl = document.getElementById('taughtResponses');
+        const avgResponseTimeEl = document.getElementById('avgResponseTime');
+        const refreshStatsBtn = document.getElementById('refreshStats');
+        
+        // API Tester elements
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const apiQuestion = document.getElementById('apiQuestion');
+        const askQuery = document.getElementById('askQuery');
+        const testAskBtn = document.getElementById('testAsk');
+        const askResponse = document.getElementById('askResponse');
+        const apiTeachQ = document.getElementById('apiTeachQ');
+        const apiTeachA = document.getElementById('apiTeachA');
+        const testTeachBtn = document.getElementById('testTeach');
+        const teachResponse = document.getElementById('teachResponse');
+        const testStatsBtn = document.getElementById('testStats');
+        const statsResponse = document.getElementById('statsResponse');
+        
+        // Theme Management
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            
+            // Update toggle icon
+            updateThemeIcon(savedTheme);
+        }
+        
+        function updateThemeIcon(theme) {
+            const icon = themeToggle.querySelector('svg');
+            if (theme === 'light') {
+                icon.innerHTML = '<path d="M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,2L14.39,5.42C13.65,5.15 12.84,5 12,5C11.16,5 10.35,5.15 9.61,5.42L12,2M3.34,7L7.5,6.65C6.9,7.16 6.36,7.78 5.94,8.5C5.5,9.24 5.25,10 5.11,10.79L3.34,7M3.36,17L5.12,13.23C5.26,14 5.53,14.78 5.95,15.5C6.37,16.24 6.91,16.86 7.5,17.37L3.36,17M20.65,7L18.88,10.79C18.74,10 18.47,9.23 18.05,8.5C17.63,7.78 17.1,7.15 16.5,6.64L20.65,7M20.64,17L16.5,17.36C17.09,16.85 17.62,16.22 18.04,15.5C18.46,14.77 18.73,14 18.87,13.21L20.64,17M12,22L9.59,18.56C10.33,18.83 11.14,19 12,19C12.82,19 13.63,18.83 14.37,18.56L12,22Z"/>';
+            } else {
+                icon.innerHTML = '<path d="M12,18C8.7,18 6,15.3 6,12C6,8.7 8.7,6 12,6C15.3,6 18,8.7 18,12C18,15.3 15.3,18 12,18M12,8C9.8,8 8,9.8 8,12C8,14.2 9.8,16 12,16C14.2,16 16,14.2 16,12C16,9.8 14.2,8 12,8M12,4C7.6,4 4,7.6 4,12C4,16.4 7.6,20 12,20C16.4,20 20,16.4 20,12C20,7.6 16.4,4 12,4Z"/>';
+            }
+        }
+        
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+            showToast(`Switched to ${newTheme} mode`);
+        });
+        
+        // Toast Notification
+        function showToast(message, type = 'success') {
+            toast.textContent = message;
+            toast.className = `toast ${type === 'error' ? 'error' : ''}`;
+            
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 10);
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Chat Functions
+        function addMessage(content, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+            
+            const now = new Date();
+            const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            messageDiv.innerHTML = `
+                <div class="message-header">
+                    <span>${isUser ? '👤 You' : '🤖 SimSimi'}</span>
+                    <span>${timeString}</span>
+                </div>
+                <div class="message-content">${content}</div>
+            `;
+            
+            chatMessages.appendChild(messageDiv);
+            scrollToBottom();
+        }
+        
+        function showTypingIndicator(show) {
+            typingIndicator.style.display = show ? 'block' : 'none';
+            if (show) scrollToBottom();
+        }
+        
+        function scrollToBottom() {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        // API Functions
+        async function askSimSimi(question) {
+            try {
+                showTypingIndicator(true);
+                
+                const response = await fetch(`${API_BASE_URL}/ask?q=${encodeURIComponent(question)}`);
+                const data = await response.json();
+                
+                showTypingIndicator(false);
+                
+                if (data.status === 'success') {
+                    addMessage(data.response);
+                    
+                    // If response needs teaching, suggest to teach
+                    if (data.needs_teaching) {
+                        setTimeout(() => {
+                            addMessage(`I don't know how to respond to "${question}". Would you like to teach me? Type "Teach: [your response]"`);
+                        }, 500);
+                    }
+                    
+                    return data;
+                } else {
+                    throw new Error(data.message || 'Failed to get response');
+                }
+            } catch (error) {
+                showTypingIndicator(false);
+                console.error('Error asking SimSimi:', error);
+                addMessage("Sorry, I'm having trouble connecting right now. Please try again later.");
+                showToast('Failed to get response from SimSimi', 'error');
+                return null;
+            }
+        }
+        
+        async function teachSimSimi(question, answer) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/teach`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ question, answer })
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    showToast('Successfully taught SimSimi! 🎉');
+                    loadStats(); // Refresh stats
+                    return data;
+                } else {
+                    throw new Error(data.message || 'Failed to teach');
+                }
+            } catch (error) {
+                console.error('Error teaching SimSimi:', error);
+                showToast('Failed to teach SimSimi', 'error');
+                return null;
+            }
+        }
+        
+        async function loadStats() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/stats`);
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    const stats = data.data;
+                    totalResponsesEl.textContent = stats.total_responses;
+                    totalInteractionsEl.textContent = stats.total_interactions;
+                    taughtResponsesEl.textContent = stats.taught_responses;
+                    avgResponseTimeEl.textContent = `${stats.avg_response_time_ms}ms`;
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+        
+        // API Tester Functions
+        async function testAskAPI() {
+            const question = apiQuestion.value.trim();
+            if (!question) {
+                showToast('Please enter a question', 'error');
+                return;
+            }
+            
+            askQuery.textContent = question;
+            askResponse.textContent = 'Testing...';
+            testAskBtn.disabled = true;
+            testAskBtn.innerHTML = '<div class="loading"></div> Testing...';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/ask?q=${encodeURIComponent(question)}`);
+                const data = await response.json();
+                
+                askResponse.textContent = JSON.stringify(data, null, 2);
+                showToast('✅ /ask test successful!');
+            } catch (error) {
+                askResponse.textContent = `Error: ${error.message}`;
+                showToast('❌ /ask test failed', 'error');
+            } finally {
+                testAskBtn.disabled = false;
+                testAskBtn.textContent = 'Test /ask Endpoint';
+            }
+        }
+        
+        async function testTeachAPI() {
+            const question = apiTeachQ.value.trim();
+            const answer = apiTeachA.value.trim();
+            
+            if (!question || !answer) {
+                showToast('Please enter both question and answer', 'error');
+                return;
+            }
+            
+            teachResponse.textContent = 'Testing...';
+            testTeachBtn.disabled = true;
+            testTeachBtn.innerHTML = '<div class="loading"></div> Testing...';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/teach`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ question, answer })
+                });
+                
+                const data = await response.json();
+                teachResponse.textContent = JSON.stringify(data, null, 2);
+                showToast('✅ /teach test successful!');
+                loadStats(); // Refresh stats
+            } catch (error) {
+                teachResponse.textContent = `Error: ${error.message}`;
+                showToast('❌ /teach test failed', 'error');
+            } finally {
+                testTeachBtn.disabled = false;
+                testTeachBtn.textContent = 'Test /teach Endpoint';
+            }
+        }
+        
+        async function testStatsAPI() {
+            statsResponse.textContent = 'Testing...';
+            testStatsBtn.disabled = true;
+            testStatsBtn.innerHTML = '<div class="loading"></div> Testing...';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/stats`);
+                const data = await response.json();
+                
+                statsResponse.textContent = JSON.stringify(data, null, 2);
+                showToast('✅ /stats test successful!');
+                loadStats(); // Refresh displayed stats
+            } catch (error) {
+                statsResponse.textContent = `Error: ${error.message}`;
+                showToast('❌ /stats test failed', 'error');
+            } finally {
+                testStatsBtn.disabled = false;
+                testStatsBtn.textContent = 'Test /stats Endpoint';
+            }
+        }
+        
+        // Event Listeners
+        sendButton.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+        
+        teachButton.addEventListener('click', async () => {
+            const question = teachQuestion.value.trim();
+            const answer = teachAnswer.value.trim();
+            
+            if (!question || !answer) {
+                showToast('Please enter both question and answer', 'error');
+                return;
+            }
+            
+            teachButton.disabled = true;
+            teachButton.innerHTML = '<div class="loading"></div> Teaching...';
+            
+            const result = await teachSimSimi(question, answer);
+            
+            if (result) {
+                addMessage(`Thanks for teaching me! I'll remember that when someone asks "${question}"`);
+                teachQuestion.value = '';
+                teachAnswer.value = '';
+            }
+            
+            teachButton.disabled = false;
+            teachButton.innerHTML = `
+                <svg viewBox="0 0 24 24" width="20" height="20">
+                    <path fill="currentColor" d="M10,17L5,12L6.41,10.58L10,14.17L17.59,6.58L19,8M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z" />
+                </svg>
+                Teach Response
+            `;
+        });
+        
+        refreshStatsBtn.addEventListener('click', loadStats);
+        
+        // API Tester event listeners
+        testAskBtn.addEventListener('click', testAskAPI);
+        apiQuestion.addEventListener('input', () => {
+            askQuery.textContent = apiQuestion.value || 'hello';
+        });
+        
+        testTeachBtn.addEventListener('click', testTeachAPI);
+        testStatsBtn.addEventListener('click', testStatsAPI);
+        
+        // Tab switching
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabId = tab.getAttribute('data-tab');
+                
+                // Update active tab
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                // Show corresponding content
+                tabContents.forEach(content => {
+                    content.classList.remove('active');
+                    if (content.id === tabId) {
+                        content.classList.add('active');
+                    }
+                });
+            });
+        });
+        
+        // Auto-teach detection in chat
+        function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message) return;
+            
+            addMessage(message, true);
+            messageInput.value = '';
+            
+            // Check if this is a teaching command
+            if (message.toLowerCase().startsWith('teach:')) {
+                const parts = message.substring(6).split('=>').map(p => p.trim());
+                if (parts.length === 2) {
+                    const [question, answer] = parts;
+                    addMessage(`Teaching: "${question}" => "${answer}"`);
+                    
+                    setTimeout(async () => {
+                        const result = await teachSimSimi(question, answer);
+                        if (result) {
+                            addMessage(`Learned successfully! Now when someone asks "${question}", I'll say: "${answer}"`);
+                        }
+                    }, 500);
+                    return;
+                }
+            }
+            
+            // Normal question
+            setTimeout(() => askSimSimi(message), 300);
+        }
+        
+        // Initialize
+        function init() {
+            initTheme();
+            loadStats();
+            scrollToBottom();
+            
+            // Auto-focus on input
+            messageInput.focus();
+            
+            // Load initial stats in API tester
+            testStatsAPI();
+            
+            // Show welcome message
+            showToast('Welcome to SimSimi Chatbot! 🤖', 'success');
+            
+            // Add example conversations
+            setTimeout(() => {
+                addMessage("Try asking me: 'hello', 'how are you', or 'what is your name'");
+            }, 1000);
+        }
+        
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', init);
+        
+        // Service worker registration for PWA (optional)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').catch(err => {
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+            });
+        }
+    </script>
+</body>
+</html>
